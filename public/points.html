@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>내 포인트</title>
+</head>
+<body>
+  <h2>내 포인트</h2>
+  <div>
+    <button id="getPoints">조회</button>
+    <span id="points">-</span>
+  </div>
+  <div>
+    <input type="number" id="amount" placeholder="변경량" />
+    <button id="updatePoints">포인트 변경</button>
+  </div>
+  <p id="msg"></p>
+  <p>
+    <button id="logout">로그아웃</button>
+  </p>
+
+  <script>
+    // 로그인 상태 체크: 토큰 없으면 로그인 페이지로
+    const token = sessionStorage.getItem('token');
+    if (!token) {
+      window.location.href = '/login.html';
+    }
+
+    const getBtn = document.getElementById('getPoints');
+    const updBtn = document.getElementById('updatePoints');
+    const pointsSpan = document.getElementById('points');
+    const msg = document.getElementById('msg');
+    const logoutBtn = document.getElementById('logout');
+
+    async function getPoints() {
+      const res = await fetch('/points', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      const data = await res.json();
+      pointsSpan.textContent = data.points ?? data.error;
+    }
+
+    async function updatePoints() {
+      const amount = parseInt(document.getElementById('amount').value, 10);
+      const res = await fetch('/points', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({ amount })
+      });
+      const data = await res.json();
+      msg.textContent = data.message || data.error;
+      getPoints();
+    }
+
+    getBtn.addEventListener('click', getPoints);
+    updBtn.addEventListener('click', updatePoints);
+    logoutBtn.addEventListener('click', () => {
+      sessionStorage.removeItem('token');
+      window.location.href = '/login.html';
+    });
+
+    // 페이지 로드 시 바로 조회
+    getPoints();
+  </script>
+</body>
+</html>
