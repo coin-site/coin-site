@@ -17,7 +17,16 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // PostgreSQL Pool 설정
-const pool = new Pool();
+const pool = new Pool({
+  host: process.env.PGHOST,
+  user: process.env.PGUSER,
+  password: process.env.PGPASSWORD,
+  database: process.env.PGDATABASE,
+  port: process.env.PGPORT,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
 
 // 기본 페이지: 로그인 페이지로 리다이렉트
 app.get('/', (req, res) => {
